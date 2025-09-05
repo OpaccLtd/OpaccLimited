@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+            background-color: #f5f5f5;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            width: 100%;
+            min-height: 100vh;
+            background-color: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .url-bar {
+            background-color: #f0f0f0;
+            padding: 8px 15px;
+            border-bottom: 1px solid #ddd;
+            font-family: -apple-system, BlinkMacSystemFont, monospace;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            min-height: 35px;
+        }
+
+        .header {
+            background-color: #333;
+            color: white;
+            padding: 20px 15px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 20px;
+            font-weight: normal;
+        }
+
+        .account-info {
+            padding: 15px;
+            flex: 1;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 18px 0;
+            border-bottom: 1px solid #e0e0e0;
+            min-height: 60px;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+            flex: 1;
+            padding-right: 15px;
+        }
+
+        .value {
+            text-align: right;
+            color: #333;
+            font-size: 15px;
+            flex: 1;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .bitcoin-text {
+            font-size: 12px;
+            color: #666;
+            margin-top: 4px;
+        }
+
+        .chat-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 56px;
+            height: 56px;
+            background-color: #4a5568;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 999;
+            border: none;
+        }
+
+        .chat-button:hover {
+            background-color: #2d3748;
+            transform: scale(1.05);
+            transition: all 0.2s ease;
+        }
+
+        .chat-icon {
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 50%;
+        }
+
+        /* Alert Styles */
+        .alert-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.3s ease-in;
+            padding: 20px;
+        }
+
+        .alert-box {
+            background-color: #fff;
+            padding: 25px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            border-top: 5px solid #ff6b6b;
+        }
+
+        .alert-icon {
+            font-size: 40px;
+            color: #ff6b6b;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .alert-title {
+            font-size: 18px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            line-height: 1.3;
+        }
+
+        .alert-message {
+            font-size: 14px;
+            color: #666;
+            line-height: 1.5;
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .alert-timer {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            border-left: 4px solid #007bff;
+            display: none;
+        }
+
+        .close-button {
+            background-color: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+
+        .close-button:hover {
+            background-color: #ff5252;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background-color: #e0e0e0;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: #ff6b6b;
+            width: 100%;
+            animation: countdown 600s linear forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+
+        @keyframes countdown {
+            from { width: 100%; }
+            to { width: 0%; }
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Mobile-specific optimizations */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 18px;
+            }
+            
+            .info-row {
+                padding: 15px 0;
+                min-height: 55px;
+            }
+            
+            .label, .value {
+                font-size: 14px;
+            }
+            
+            .bitcoin-text {
+                font-size: 11px;
+            }
+            
+            .alert-box {
+                margin: 15px;
+                padding: 20px 18px;
+            }
+            
+            .alert-title {
+                font-size: 16px;
+            }
+            
+            .alert-message {
+                font-size: 13px;
+            }
+            
+            .chat-button {
+                width: 50px;
+                height: 50px;
+                bottom: 15px;
+                right: 15px;
+            }
+            
+            .chat-icon {
+                width: 20px;
+                height: 20px;
+            }
+        }
+
+        /* Very small screens */
+        @media (max-width: 360px) {
+            .account-info {
+                padding: 12px;
+            }
+            
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px 0;
+                gap: 5px;
+            }
+            
+            .label {
+                padding-right: 0;
+            }
+            
+            .value {
+                text-align: left;
+            }
+            
+            .alert-box {
+                margin: 10px;
+                padding: 18px 15px;
+            }
+        }
+
+        /* Prevent horizontal scroll */
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+        }
+
+        /* Touch-friendly buttons */
+        .close-button {
+            min-height: 44px;
+        }
+
+        .chat-button {
+            min-height: 44px;
+            min-width: 44px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="url-bar">
+            🔒 opacclimited.com/?a=ac
+        </div>
+        
+        <div class="header">
+            <h1>Your account:</h1>
+        </div>
+
+        <div class="account-info">
+            <div class="info-row">
+                <span class="label">User:</span>
+                <span class="value">Franklorita</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Registration Date:</span>
+                <span class="value">Jul-02-2023</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Last Access:</span>
+                <span class="value">Oct-03-2024 00:54:18 PM</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Account Balance:</span>
+                <div class="value">
+                    <div>$601,730.23</div>
+                    <div class="bitcoin-text">₿9.87 BTC (approx.)</div>
+                </div>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Total Earned:</span>
+                <span class="value">$588,730.23</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Pending Withdrawal:</span>
+                <span class="value">$0.00</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Total Withdrew:</span>
+                <span class="value">$800.00</span>
+            </div>
+
+            <div class="info-row">
+                <span class="label">Active Deposit:</span>
+                <span class="value">$601,730.23</span>
+            </div>
+        </div>
+    </div>
+
+    <button class="chat-button" onclick="openChat()" aria-label="Open chat">
+        <div class="chat-icon"></div>
+    </button>
+
+    <!-- Alert Overlay -->
+    <div class="alert-overlay" id="alertOverlay">
+        <div class="alert-box">
+            <span class="alert-icon">⚠</span>
+            <h2 class="alert-title">Account Temporarily Restricted</h2>
+            <div class="alert-message">
+                Your account has been temporarily restricted and is currently under court appeal. During this period, you will be unable to carry out any further transactions. However, please be assured that your investment and accrued profits remain secure and will be fully accessible once the case is resolved.
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+            <div class="alert-timer" id="timerDisplay">
+                This alert will automatically close in: <span id="countdown">10:00</span>
+            </div>
+            <button class="close-button" onclick="closeAlert()">Understand</button>
+        </div>
+    </div>
+
+    <script>
+        let timeLeft = 600; // 10 minutes in seconds
+        let timerInterval;
+
+        function updateTimer() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            const countdownElement = document.getElementById('countdown');
+            
+            if (countdownElement) {
+                countdownElement.textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            if (timeLeft <= 0) {
+                closeAlert();
+                clearInterval(timerInterval);
+            } else {
+                timeLeft--;
+            }
+        }
+
+        function closeAlert() {
+            const overlay = document.getElementById('alertOverlay');
+            if (overlay) {
+                overlay.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+            
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        }
+
+        function openChat() {
+            // Placeholder function for chat functionality
+            console.log('Chat button clicked');
+            alert('Chat functionality would be implemented here');
+        }
+
+        // Start the timer when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            // Show progress bar but keep timer invisible
+            const progressBar = document.querySelector('.progress-bar');
+            
+            if (progressBar) progressBar.style.display = 'block';
+            
+            updateTimer(); // Update immediately
+            timerInterval = setInterval(updateTimer, 1000); // Then every second
+        });
+
+        // Clean up on page unload
+        window.addEventListener('beforeunload', function() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+            }
+        });
+
+        // Add keyboard support for alert
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                const overlay = document.getElementById('alertOverlay');
+                if (overlay && !overlay.classList.contains('hidden')) {
+                    closeAlert();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
